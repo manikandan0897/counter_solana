@@ -1,3 +1,6 @@
+.anchor
+target
+**/*.rs.bk
 # Logs
 logs
 *.log
