@@ -1,0 +1,115 @@
+{
+    "address": "67LQVCehLSwkRQ7YoA6WMU9YGPSmpseTRHJjyT2uVGer",
+    "metadata": {
+      "name": "counter",
+      "version": "0.1.0",
+      "spec": "0.1.0",
+      "description": "Created with Anchor"
+    },
+    "instructions": [
+      {
+        "name": "decrement",
+        "discriminator": [
+          106,
+          227,
+          168,
+          59,
+          248,
+          27,
+          150,
+          101
+        ],
+        "accounts": [
+          {
+            "name": "my_storage",
+            "writable": true
+          }
+        ],
+        "args": []
+      },
+      {
+        "name": "increment",
+        "discriminator": [
+          11,
+          18,
+          104,
+          9,
+          104,
+          174,
+          59,
+          33
+        ],
+        "accounts": [
+          {
+            "name": "my_storage",
+            "writable": true
+          }
+        ],
+        "args": []
+      },
+      {
+        "name": "initialize",
+        "discriminator": [
+          175,
+          175,
+          109,
+          31,
+          13,
+          152,
+          155,
+          237
+        ],
+        "accounts": [
+          {
+            "name": "my_storage",
+            "writable": true,
+            "signer": true
+          },
+          {
+            "name": "signer",
+            "writable": true,
+            "signer": true
+          },
+          {
+            "name": "system_program",
+            "address": "11111111111111111111111111111111"
+          }
+        ],
+        "args": [
+          {
+            "name": "value",
+            "type": "u64"
+          }
+        ]
+      }
+    ],
+    "accounts": [
+      {
+        "name": "MyStorage",
+        "discriminator": [
+          28,
+          242,
+          59,
+          133,
+          67,
+          25,
+          49,
+          40
+        ]
+      }
+    ],
+    "types": [
+      {
+        "name": "MyStorage",
+        "type": {
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "data",
+              "type": "u64"
+            }
+          ]
+        }
+      }
+    ]
+}
