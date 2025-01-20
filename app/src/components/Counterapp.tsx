@@ -2,10 +2,10 @@ import React,{useEffect, useState} from 'react'
 import { useWallet,useConnection,useAnchorWallet } from "@solana/wallet-adapter-react";
 import { PhantomWalletName } from "@solana/wallet-adapter-wallets"
 import { PublicKey, Keypair } from "@solana/web3.js";
-import { Program, AnchorProvider, setProvider,BN  } from '@coral-xyz/anchor';
+import { Program, AnchorProvider, setProvider } from '@coral-xyz/anchor';
 import idl from './idl.json'
-import type { Counter } from './counter';
-
+import type { CounterProgram } from './counter';
+import * as solanaWeb3 from "@solana/web3.js";
 
 export default function Counterapp() {
 
@@ -13,7 +13,6 @@ export default function Counterapp() {
   const { connection } = useConnection();
   const [value,setvalue] = useState("");
   const wallet = useAnchorWallet();
-
   
   const onConnect = () => {
     select(PhantomWalletName)
@@ -22,11 +21,17 @@ export default function Counterapp() {
   useEffect(() => {
     const gettokenvalue = async() => {
       if(wallet) {
+        console.log("");  
         const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
         setProvider(provider);
-        const program = new Program(idl as Counter, provider);
+        const program = new Program(idl as CounterProgram, provider);
         try {
-          const accountincrementhash = await program.account.myStorage.fetch("4MU2rZQpeJ7dZJh3YUZ3SXTWFPP8PnuBQBz3v4apfRxB");
+          const counteraccount = new PublicKey(wallet.publicKey); 
+          const [owner] =  solanaWeb3.PublicKey.findProgramAddressSync(
+            [counteraccount.toBuffer()],
+            program.programId,
+          );
+          const accountincrementhash = await program.account.newAccount.fetch(owner);
           const valueinc = accountincrementhash.data;
           setvalue(valueinc.toString())
         } catch (error) {
@@ -39,46 +44,59 @@ export default function Counterapp() {
 
   const counterinit = async() => {
     if(wallet) {
-      const counterAccount = Keypair.generate();
       const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
       setProvider(provider);
-      const program = new Program(idl as Counter, provider);
-      // const counteraccount = new PublicKey(wallet.publicKey); 
-      const initialize = await program.methods.initialize(new BN(1)).accounts({
-        myStorage: counterAccount.publicKey,
-        signer: wallet.publicKey
+      const program = new Program(idl as CounterProgram, provider);
+      const counteraccount = new PublicKey(wallet.publicKey); 
+      const [owner] =  solanaWeb3.PublicKey.findProgramAddressSync(
+        [counteraccount.toBuffer()],
+        program.programId,
+      );
+      const initialize = await program.methods.initialize().accounts({
+        newAccount: owner
       })
-      .signers([counterAccount])
       .rpc();
       console.log("Transaction successful: ", initialize);
     }
   }
 
+
   const counterinc = async() => {
     if(wallet) {
       const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
       setProvider(provider);
-      const program = new Program(idl as Counter, provider);
+      const program = new Program(idl as CounterProgram, provider);
+      const counteraccount = new PublicKey(wallet.publicKey); 
+      const [owner] =  solanaWeb3.PublicKey.findProgramAddressSync(
+        [counteraccount.toBuffer()],
+        program.programId,
+      );
       await program.methods.increment().accounts({
-        myStorage: "4MU2rZQpeJ7dZJh3YUZ3SXTWFPP8PnuBQBz3v4apfRxB",
+        newAccount: owner,
       })
       .rpc();
-      const accountincrementhash = await program.account.myStorage.fetch("4MU2rZQpeJ7dZJh3YUZ3SXTWFPP8PnuBQBz3v4apfRxB");
+      const accountincrementhash = await program.account.newAccount.fetch(owner);
       const valueinc = accountincrementhash.data;
       setvalue(valueinc.toString())
     }
   }
 
+
   const counterdec = async() => {
     if(wallet) {
       const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
       setProvider(provider);
-      const program = new Program(idl as Counter, provider);
+      const program = new Program(idl as CounterProgram, provider);
+      const counteraccount = new PublicKey(wallet.publicKey); 
+      const [owner] =  solanaWeb3.PublicKey.findProgramAddressSync(
+        [counteraccount.toBuffer()],
+        program.programId,
+      );
       await program.methods.decrement().accounts({
-        myStorage: "4MU2rZQpeJ7dZJh3YUZ3SXTWFPP8PnuBQBz3v4apfRxB",
+        newAccount: owner,
       })
       .rpc();
-      const accountincrementhash = await program.account.myStorage.fetch("4MU2rZQpeJ7dZJh3YUZ3SXTWFPP8PnuBQBz3v4apfRxB");
+      const accountincrementhash = await program.account.newAccount.fetch(owner);
       const valueinc = accountincrementhash.data;
       setvalue(valueinc.toString())
     }

@@ -1,46 +1,41 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
-import { Counter } from "../target/types/counter";
-import BN from "bn.js";
+import { CounterProgram } from "../target/types/counter_program";
 import * as web3 from "@solana/web3.js";
 
 describe("counter", () => {
   // Configure the client to use the local cluster.
   anchor.setProvider(anchor.AnchorProvider.env());
 
-  const program = anchor.workspace.Counter as Program<Counter>;
-
+  const program = anchor.workspace.CounterProgram as Program<CounterProgram>;
+  
   it("initialize", async () => {
-    const initialValue = new BN(1);
-      
-    const counterAccount = anchor.web3.Keypair.generate();
-      
-    const txhashinit = await program.methods
-      .initialize(initialValue)
+    const payer = program.provider.publicKey
+    const [owner] =  web3.PublicKey.findProgramAddressSync(
+      [payer.toBuffer()],
+      program.programId,
+    );
+    const txhashinit = await program.methods.initialize()
       .accounts({
-        myStorage: counterAccount.publicKey
+        newAccount: owner
       })
-      .signers([counterAccount])
       .rpc();
-    
     console.log(`Initialize finished`,txhashinit);
     
-    await program.methods
+    const txhashincr = await program.methods
       .increment()
       .accounts({
-        myStorage: counterAccount.publicKey,
+        newAccount: owner
       })  
       .rpc();
-    const accountincrementhash = await program.account.myStorage.fetch(counterAccount.publicKey);
-    console.log(`Increment finished`,accountincrementhash.data.toString());
+    console.log(`Increment finished`,txhashincr);
     
-    await program.methods
+    const txhashdec = await program.methods
       .decrement()
       .accounts({
-        myStorage: counterAccount.publicKey
+        newAccount: owner
       })  
       .rpc();
-    const decrementhash = await program.account.myStorage.fetch(counterAccount.publicKey);
-      console.log(`decrement finished`,decrementhash.data.toString());
+      console.log(`decrement finished`,txhashdec);
   });
 });
